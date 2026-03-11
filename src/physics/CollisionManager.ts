@@ -4,7 +4,7 @@ export class CollisionManager {
   private impactAccumulator = 0;
 
   register(body: CANNON.Body): void {
-    body.addEventListener('collide', (event) => {
+    body.addEventListener('collide', (event: { contact: { getImpactVelocityAlongNormal(): number } }) => {
       const rv = event.contact.getImpactVelocityAlongNormal();
       this.impactAccumulator = Math.max(this.impactAccumulator, Math.abs(rv));
     });

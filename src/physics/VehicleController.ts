@@ -43,6 +43,7 @@ export class VehicleController {
   private readonly pointVector = new CANNON.Vec3();
   private readonly down = new CANNON.Vec3(0, -1, 0);
   private readonly result = new CANNON.RaycastResult();
+  private readonly velocityAtPoint = new CANNON.Vec3();
   private readonly comOffset = new CANNON.Vec3(
     VEHICLE_CONFIG.centerOfMassOffset.x,
     VEHICLE_CONFIG.centerOfMassOffset.y,
@@ -190,7 +191,6 @@ export class VehicleController {
   }
 
   private applyWheelForces(dt: number, engine: number, braking: number, handbrake: boolean): void {
-    const down = this.down;
     for (const wheel of this.wheels) {
       const connection = wheel.localConnection.clone();
       const worldConnection = new THREE.Vector3(connection.x, connection.y, connection.z)
@@ -206,7 +206,8 @@ export class VehicleController {
       if (hit && this.result.body !== this.body) {
         const suspensionDistance = Math.max(0, this.result.distance - VEHICLE_CONFIG.wheelRadius);
         const compression = VEHICLE_CONFIG.suspensionRestLength - suspensionDistance;
-        const pointVelocity = this.body.getVelocityAtWorldPoint(this.result.hitPointWorld);
+        this.body.getVelocityAtWorldPoint(this.result.hitPointWorld, this.velocityAtPoint);
+        const pointVelocity = this.velocityAtPoint;
         const springForce = compression * VEHICLE_CONFIG.suspensionStiffness;
         const damperForce = -pointVelocity.y * VEHICLE_CONFIG.suspensionDamping;
         const suspensionForce = springForce + damperForce;
